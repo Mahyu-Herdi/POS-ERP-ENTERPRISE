@@ -1,0 +1,10 @@
+{
+  "name": "Smart POS Warkop",
+  "description": "A modern, responsive Point of Sale (POS) system tailored for coffee shops (Warkop) with order queue management, table maps, financial reports, asset tracking, and QRIS payments.",
+  "requestFramePermissions": [
+    "bluetooth"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

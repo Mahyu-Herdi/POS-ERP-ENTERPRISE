@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#251c18" />
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icon.png" />
+    <title>Smart POS Warkop</title>
+    <script>
+      try {
+        const savedTheme = localStorage.getItem('pos_theme') || 'neutral';
+        if (savedTheme === 'dark') {
+          document.body.classList.add('dark-mode');
+        } else if (savedTheme === 'neutral') {
+          document.body.classList.add('neutral-mode');
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service worker terdaftar'))
+            .catch(err => console.log('Service worker gagal:', err));
+        });
+      }
+    </script>
+  </body>
+</html>
+
