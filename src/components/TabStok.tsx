@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useStore } from '../store';
-import { CheckCircle2, Check } from 'lucide-react';
+import { CheckCircle2, Check, Download } from 'lucide-react';
 import { useAppModal } from './ModalContext';
 import { formatTanggalIndo } from '../utils/dateFormatter';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function TabStok() {
   const { stokData, stokHistory, keuangan, addStok, updateStok, deleteStok, addStokHistory, updateKeuangan, addTransaksi } = useStore();
@@ -124,6 +126,69 @@ export default function TabStok() {
     return match;
   }).reverse();
 
+  const handleCetakPDF = () => {
+    const doc = new jsPDF();
+    const now = new Date();
+    const hariCetak = now.toLocaleDateString('id-ID', { weekday: 'long' });
+    const tglCetak = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+    const jamCetak = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+    doc.setFontSize(16);
+    doc.text('Laporan Riwayat Stok', 14, 20);
+    
+    doc.setFontSize(10);
+    doc.text(`Dicetak pada: ${hariCetak}, ${tglCetak} | ${jamCetak}`, 14, 28);
+    
+    const stokMasuk = filteredHistory.filter(h => h.tipe.toLowerCase().includes('masuk') || h.tipe.toLowerCase().includes('modal awal'));
+    const stokKeluar = filteredHistory.filter(h => h.tipe.toLowerCase().includes('keluar'));
+    
+    const formatWaktu = (isoString: string) => {
+      const d = new Date(isoString);
+      const hari = d.toLocaleDateString('id-ID', { weekday: 'long' });
+      const tgl = d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+      const jam = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      return `${hari}, ${tgl} ${jam}`;
+    };
+
+    doc.setFontSize(12);
+    doc.text('Stok Masuk', 14, 38);
+    
+    autoTable(doc, {
+      startY: 42,
+      head: [['Waktu (Hari, Tgl, Jam)', 'Item', 'Keterangan/Tipe', 'Qty']],
+      body: stokMasuk.map(h => [
+        formatWaktu(h.tgl),
+        h.item,
+        h.tipe,
+        `+${h.qty}`
+      ]),
+      theme: 'grid',
+      headStyles: { fillColor: [40, 167, 69] },
+      styles: { fontSize: 9 }
+    });
+    
+    let finalY = (doc as any).lastAutoTable.finalY || 42;
+    
+    doc.setFontSize(12);
+    doc.text('Stok Keluar', 14, finalY + 10);
+    
+    autoTable(doc, {
+      startY: finalY + 14,
+      head: [['Waktu (Hari, Tgl, Jam)', 'Item', 'Keterangan/Tipe', 'Qty']],
+      body: stokKeluar.map(h => [
+        formatWaktu(h.tgl),
+        h.item,
+        h.tipe,
+        `-${h.qty}`
+      ]),
+      theme: 'grid',
+      headStyles: { fillColor: [220, 53, 69] },
+      styles: { fontSize: 9 }
+    });
+    
+    doc.save(`Laporan_Stok_${tglCetak.replace(/ /g, '_')}.pdf`);
+  };
+
   return (
     <>
       <div className="clay-card">
@@ -163,7 +228,12 @@ export default function TabStok() {
       </div>
       
       <div className="clay-card">
-        <h3 style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>Riwayat Mutasi Stok</h3>
+        <div className="flex-between" style={{ marginBottom: '15px' }}>
+          <h3 style={{ color: 'var(--text-muted)', margin: 0 }}>Riwayat Mutasi Stok</h3>
+          <button className="btn bg-blue" style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }} onClick={handleCetakPDF}>
+            <Download size={14} /> Cetak PDF
+          </button>
+        </div>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
           <input type="text" placeholder="Cari nama..." value={searchName} onChange={e => setSearchName(e.target.value)} className="btn-input" style={{ margin: 0, fontSize: '12px', flex: 1 }} />
           <input type="date" value={filterMulai} onChange={e => setFilterMulai(e.target.value)} className="btn-input" style={{ margin: 0, fontSize: '12px' }} />
