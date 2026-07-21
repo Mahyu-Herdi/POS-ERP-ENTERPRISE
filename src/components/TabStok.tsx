@@ -5,6 +5,7 @@ import { useAppModal } from './ModalContext';
 import { formatTanggalIndo } from '../utils/dateFormatter';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import CustomDatePicker from './CustomDatePicker';
 
 export default function TabStok() {
   const { stokData, stokHistory, keuangan, addStok, updateStok, deleteStok, addStokHistory, updateKeuangan, addTransaksi } = useStore();
@@ -236,8 +237,8 @@ export default function TabStok() {
         </div>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
           <input type="text" placeholder="Cari nama..." value={searchName} onChange={e => setSearchName(e.target.value)} className="btn-input" style={{ margin: 0, fontSize: '12px', flex: 1 }} />
-          <input type="date" value={filterMulai} onChange={e => setFilterMulai(e.target.value)} className="btn-input" style={{ margin: 0, fontSize: '12px' }} />
-          <input type="date" value={filterAkhir} onChange={e => setFilterAkhir(e.target.value)} className="btn-input" style={{ margin: 0, fontSize: '12px' }} />
+          <CustomDatePicker value={filterMulai} onChange={setFilterMulai} placeholder="Mulai Tgl" className="btn-input" style={{ margin: 0, fontSize: '12px', width: '130px' }} />
+          <CustomDatePicker value={filterAkhir} onChange={setFilterAkhir} placeholder="Akhir Tgl" className="btn-input" style={{ margin: 0, fontSize: '12px', width: '130px' }} />
           <button className="btn bg-dim" style={{ margin: 0, padding: '10px 15px', fontSize: '12px', color: 'var(--text-main)' }} onClick={() => { setFilterMulai(''); setFilterAkhir(''); setSearchName(''); }}>Reset</button>
         </div>
         <table>

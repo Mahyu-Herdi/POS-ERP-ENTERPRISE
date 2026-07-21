@@ -3,6 +3,7 @@ import { useStore } from '../store';
 import { CheckCircle2, Check, Printer } from 'lucide-react';
 import { useAppModal } from './ModalContext';
 import { formatTanggalIndo } from '../utils/dateFormatter';
+import CustomDatePicker from './CustomDatePicker';
 
 export default function TabLaporan() {
   const { keuangan, bebanAktif, transaksiList, hutangList, updateKeuangan, addTransaksi, deleteTransaksi, updateHutang } = useStore();
@@ -308,8 +309,8 @@ export default function TabLaporan() {
 
         <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', flexWrap: 'wrap' }}>
           <input type="text" placeholder="Cari nama..." className="btn-input" style={{ margin: 0, fontSize: '12px', flex: '1 1 150px' }} value={searchName} onChange={e => setSearchName(e.target.value)} />
-          <input type="date" className="btn-input" style={{ margin: 0, fontSize: '12px', flex: '1 1 120px' }} value={filterTxMulai} onChange={e => setFilterTxMulai(e.target.value)} />
-          <input type="date" className="btn-input" style={{ margin: 0, fontSize: '12px', flex: '1 1 120px' }} value={filterTxAkhir} onChange={e => setFilterTxAkhir(e.target.value)} />
+          <CustomDatePicker value={filterTxMulai} onChange={setFilterTxMulai} placeholder="Mulai Tgl" className="btn-input" style={{ margin: 0, fontSize: '12px', flex: '1 1 120px' }} />
+          <CustomDatePicker value={filterTxAkhir} onChange={setFilterTxAkhir} placeholder="Akhir Tgl" className="btn-input" style={{ margin: 0, fontSize: '12px', flex: '1 1 120px' }} />
           <button className="btn bg-dim" style={{ margin: 0, padding: '10px 15px', fontSize: '12px', color: 'var(--text-main)' }} onClick={() => { setFilterTxMulai(''); setFilterTxAkhir(''); setSearchName(''); }}>Reset</button>
           <button className="btn bg-blue" style={{ margin: 0, padding: '10px 15px', fontSize: '12px', color: 'var(--text-main)' }} onClick={handlePrintReport}>
             <Printer size={14} /> Cetak PDF Laporan

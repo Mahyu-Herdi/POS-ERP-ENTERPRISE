@@ -2,6 +2,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: dark;
   --bg-color: #FFFFFF;
   --clay-bg: #875F43;
   --input-bg: #3E2B1F;
@@ -23,6 +24,7 @@
 }
 
 body.neutral-mode {
+  color-scheme: light;
   --bg-color: #E6DFD1;
   --clay-bg: #F5EFEB;
   --input-bg: #DCD3C3;
@@ -43,6 +45,7 @@ body.neutral-mode {
 }
 
 body.dark-mode {
+  color-scheme: dark;
   --bg-color: #2A1B13;
   --clay-bg: #38251A;
   --input-bg: #1D120C;
