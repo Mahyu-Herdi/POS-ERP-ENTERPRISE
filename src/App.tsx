@@ -19,6 +19,12 @@ export default function App() {
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('activeTab') || 'kasir';
   });
+  
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('pos_authenticated') === 'true';
+  });
+  const [loginPassword, setLoginPassword] = useState('');
+
   const [activeSubTab, setActiveSubTab] = useState('sub-sistem');
   const [isSaving, setIsSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -624,6 +630,37 @@ Silahkan Datang Kembali!`;
       resetInput();
     }
   };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loginPassword === 'M24yu@mhy') {
+      setIsAuthenticated(true);
+      localStorage.setItem('pos_authenticated', 'true');
+    } else {
+      popup('alert', 'Sandi salah!', 'Gagal');
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-color)', padding: '20px' }}>
+        <form onSubmit={handleLogin} className="clay-card" style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <h2 style={{ textAlign: 'center', margin: 0 }}>Login Smart POS</h2>
+          <input 
+            type="password" 
+            placeholder="Masukkan Sandi" 
+            value={loginPassword}
+            onChange={(e) => setLoginPassword(e.target.value)}
+            className="btn-input"
+            autoFocus
+          />
+          <button type="submit" className="btn text-blue" style={{ marginTop: '10px' }}>
+            <Check size={20} /> Masuk
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   const isPrinting = !!(activePrintTx || activePrintReport);
 
