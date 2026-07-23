@@ -29,6 +29,14 @@ export default function App() {
   const [loginPassword, setLoginPassword] = useState('');
   const [isLoginLoading, setIsLoginLoading] = useState(false);
 
+  // State untuk Reset Sandi Mandiri via OTP Apps Script
+  const [showResetView, setShowResetView] = useState(false);
+  const [resetRole, setResetRole] = useState<'admin' | 'kasir'>('admin');
+  const [resetStep, setResetStep] = useState<1 | 2>(1);
+  const [resetOtp, setResetOtp] = useState('');
+  const [newPasswordInput, setNewPasswordInput] = useState('');
+  const [isResetLoading, setIsResetLoading] = useState(false);
+
   const [activeSubTab, setActiveSubTab] = useState('sub-sistem');
   const [isSaving, setIsSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -795,24 +803,236 @@ Silahkan Datang Kembali!`;
           </AnimatePresence>
         </button>
 
-        <form onSubmit={handleLogin} className="clay-card" style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <h2 style={{ textAlign: 'center', margin: 0 }}>Login Smart POS</h2>
-          <input 
-            type="password" 
-            placeholder="Masukkan Sandi" 
-            value={loginPassword}
-            onChange={(e) => setLoginPassword(e.target.value)}
-            className="btn-input"
-            autoFocus
-          />
-          <button type="submit" className="btn text-blue" style={{ marginTop: '10px' }} disabled={isLoginLoading}>
-            {isLoginLoading ? (
-              <><Loader2 size={20} className="animate-spin" /> Sedang Memproses...</>
+        {!showResetView ? (
+          <form onSubmit={handleLogin} className="clay-card" style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <h2 style={{ textAlign: 'center', margin: 0 }}>Login Smart POS</h2>
+            <input 
+              type="password" 
+              placeholder="Masukkan Sandi" 
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              className="btn-input"
+              autoFocus
+            />
+            <button type="submit" className="btn text-blue" style={{ marginTop: '10px' }} disabled={isLoginLoading}>
+              {isLoginLoading ? (
+                <><Loader2 size={20} className="animate-spin" /> Sedang Memproses...</>
+              ) : (
+                <><Check size={20} /> Masuk</>
+              )}
+            </button>
+            <div style={{ textAlign: 'center', marginTop: '5px' }}>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setShowResetView(true);
+                  setResetStep(1);
+                  setResetOtp('');
+                  setNewPasswordInput('');
+                }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                Lupa Sandi?
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="clay-card" style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <h2 style={{ textAlign: 'center', margin: 0 }}>Reset Sandi</h2>
+            
+            {resetStep === 1 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', lineHeight: '1.4', margin: 0 }}>
+                  Kode OTP rahasia akan dikirim secara otomatis ke <strong>Email Pemilik</strong> (Akun Google yang mendeploy Apps Script). Silakan tanyakan kode OTP kepada pemilik toko/admin utama setelah dikirim.
+                </p>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Pilih Akun</label>
+                  <select 
+                    value={resetRole} 
+                    onChange={(e: any) => setResetRole(e.target.value)}
+                    className="btn-input"
+                    style={{ background: 'var(--input-bg)', color: 'var(--text-main)', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer' }}
+                  >
+                    <option value="admin">Admin Utama</option>
+                    <option value="kasir">Kasir Toko</option>
+                  </select>
+                </div>
+
+                <button 
+                  type="button" 
+                  className="btn text-blue" 
+                  onClick={async () => {
+                    if (!GAS_URL) {
+                      await popup('alert', 'URL Apps Script belum diatur di dalam kode sumber.', 'Gagal');
+                      return;
+                    }
+                    setIsResetLoading(true);
+                    try {
+                      const response = await fetch(GAS_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' },
+                        redirect: 'follow',
+                        body: JSON.stringify({ type: 'REQUEST_OTP', role: resetRole })
+                      });
+                      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                      const text = await response.text();
+                      const result = JSON.parse(text);
+                      
+                      if (result.status === 'success') {
+                        await popup('alert', 'Kode OTP berhasil dikirim! Silakan minta pemilik akun Google Apps Script untuk memeriksa kotak masuk email mereka.', 'OTP Terkirim');
+                        setResetStep(2);
+                      } else {
+                        throw new Error(result.message || 'Gagal mengirim OTP');
+                      }
+                    } catch (err: any) {
+                      console.error(err);
+                      await popup('alert', 'Gagal mengirim OTP: ' + (err.message || String(err)), 'Error');
+                    } finally {
+                      setIsResetLoading(false);
+                    }
+                  }}
+                  disabled={isResetLoading}
+                  style={{ marginTop: '10px' }}
+                >
+                  {isResetLoading ? (
+                    <><Loader2 size={20} className="animate-spin" /> Mengirim OTP...</>
+                  ) : (
+                    'Kirim Kode OTP ke Email'
+                  )}
+                </button>
+              </div>
             ) : (
-              <><Check size={20} /> Masuk</>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', lineHeight: '1.4', margin: 0 }}>
+                  Masukkan kode OTP 6-digit yang diterima di email pemilik dan tentukan sandi baru Anda.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Kode OTP (6 Digit)</label>
+                  <input 
+                    type="text" 
+                    placeholder="Contoh: 123456" 
+                    value={resetOtp}
+                    onChange={(e) => setResetOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    className="btn-input"
+                    maxLength={6}
+                    style={{ textAlign: 'center', letterSpacing: '4px', fontWeight: 'bold', fontSize: '18px' }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Sandi Baru</label>
+                  <input 
+                    type="password" 
+                    placeholder="Masukkan sandi baru" 
+                    value={newPasswordInput}
+                    onChange={(e) => setNewPasswordInput(e.target.value)}
+                    className="btn-input"
+                  />
+                </div>
+
+                <button 
+                  type="button" 
+                  className="btn text-blue" 
+                  onClick={async () => {
+                    if (resetOtp.length !== 6) {
+                      await popup('alert', 'Harap masukkan 6 digit kode OTP dengan benar.', 'Perhatian');
+                      return;
+                    }
+                    if (!newPasswordInput.trim()) {
+                      await popup('alert', 'Harap masukkan sandi baru.', 'Perhatian');
+                      return;
+                    }
+                    if (!GAS_URL) {
+                      await popup('alert', 'URL Apps Script belum diatur.', 'Gagal');
+                      return;
+                    }
+                    setIsResetLoading(true);
+                    try {
+                      const response = await fetch(GAS_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' },
+                        redirect: 'follow',
+                        body: JSON.stringify({ 
+                          type: 'VERIFY_OTP_RESET_PASSWORD', 
+                          role: resetRole,
+                          otp: resetOtp,
+                          newPassword: newPasswordInput
+                        })
+                      });
+                      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                      const text = await response.text();
+                      const result = JSON.parse(text);
+                      
+                      if (result.status === 'success') {
+                        await popup('alert', 'Sandi baru berhasil disimpan! Silakan login dengan sandi baru Anda.', 'Berhasil');
+                        setShowResetView(false);
+                      } else {
+                        throw new Error(result.message || 'OTP salah atau kedaluwarsa');
+                      }
+                    } catch (err: any) {
+                      console.error(err);
+                      await popup('alert', 'Gagal reset sandi: ' + (err.message || String(err)), 'Error');
+                    } finally {
+                      setIsResetLoading(false);
+                    }
+                  }}
+                  disabled={isResetLoading}
+                  style={{ marginTop: '10px' }}
+                >
+                  {isResetLoading ? (
+                    <><Loader2 size={20} className="animate-spin" /> Menyimpan Sandi...</>
+                  ) : (
+                    'Simpan Sandi Baru'
+                  )}
+                </button>
+
+                <button 
+                  type="button" 
+                  onClick={async () => {
+                    setIsResetLoading(true);
+                    try {
+                      const response = await fetch(GAS_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' },
+                        redirect: 'follow',
+                        body: JSON.stringify({ type: 'REQUEST_OTP', role: resetRole })
+                      });
+                      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                      const text = await response.text();
+                      const result = JSON.parse(text);
+                      if (result.status === 'success') {
+                        await popup('alert', 'Kode OTP baru telah dikirim ulang! Silakan periksa email pemilik.', 'OTP Terkirim Ulang');
+                        setResetOtp('');
+                      } else {
+                        throw new Error(result.message || 'Gagal mengirim ulang OTP');
+                      }
+                    } catch (err: any) {
+                      await popup('alert', 'Gagal mengirim ulang OTP: ' + (err.message || String(err)), 'Error');
+                    } finally {
+                      setIsResetLoading(false);
+                    }
+                  }}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline', marginTop: '5px' }}
+                  disabled={isResetLoading}
+                >
+                  Kirim Ulang OTP
+                </button>
+              </div>
             )}
-          </button>
-        </form>
+
+            <div style={{ textAlign: 'center', marginTop: '5px' }}>
+              <button 
+                type="button" 
+                onClick={() => setShowResetView(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                Kembali ke Login
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
