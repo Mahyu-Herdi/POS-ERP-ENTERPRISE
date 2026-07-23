@@ -38,6 +38,7 @@ export interface TokoData {
   gasUrl?: string;
   qrisStatis?: string;
   pinKasir?: string;
+  pinAdmin?: string;
 }
 
 export interface HutangItem {
