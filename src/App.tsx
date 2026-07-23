@@ -200,12 +200,11 @@ Silahkan Datang Kembali!`;
     const lastChange = parseInt(localStorage.getItem('pos_last_change_time') || '0', 10);
     if (lastChange === 0) return true;
     
-    const lastDate = new Date(lastChange).toDateString();
-    const today = new Date().toDateString();
     const hoursElapsed = (Date.now() - lastChange) / (1000 * 60 * 60);
     
-    if (lastDate !== today || hoursElapsed > 1) {
-      console.log('Unsynced data is old. Discarding to prioritize cloud data.');
+    // Allow up to 72 hours of offline queue before discarding
+    if (hoursElapsed > 72) {
+      console.log('Unsynced data is too old ( > 72h). Discarding to prioritize cloud data.');
       localStorage.setItem('pos_unsynced', 'false');
       return false;
     }
@@ -399,8 +398,10 @@ Silahkan Datang Kembali!`;
       if (GAS_URL) {
         const isUnsynced = isStaleUnsynced();
         if (isUnsynced) {
+          popup('alert', 'Perangkat terhubung kembali ke internet! Mengirim antrean data offline ke Google Sheets...', 'Informasi');
           await syncToSheets(false);
           await pullFromSheets(false);
+          popup('alert', 'Semua data offline berhasil disinkronkan ke Google Sheets!', 'Sukses');
         } else {
           await pullFromSheets(false);
         }
