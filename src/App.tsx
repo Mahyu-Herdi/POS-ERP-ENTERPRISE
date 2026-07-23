@@ -228,6 +228,11 @@ Silahkan Datang Kembali!`;
       return;
     }
 
+    if (localStorage.getItem('pos_setup_complete') !== 'true') {
+      console.log('Sync blocked: App has never pulled from cloud after clearing data. We must pull first to prevent overwriting cloud data.');
+      return;
+    }
+
     if (isSyncingInProgress.current) {
       console.log('Sync already in progress, skipping.');
       return;
@@ -340,6 +345,7 @@ Silahkan Datang Kembali!`;
 
       if (result.status === 'success' && result.data) {
         isPullingRef.current = true;
+        localStorage.setItem('pos_setup_complete', 'true');
         
         useStore.getState().setFullState({
           toko: result.data.toko || { nama: '', logoBase64: null },
