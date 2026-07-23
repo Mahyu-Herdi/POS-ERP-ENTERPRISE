@@ -286,7 +286,7 @@ Silahkan Datang Kembali!`;
         throw new Error(result.message || 'Gagal menyimpan ke cloud');
       }
     } catch (error: any) {
-      console.error('Sync error:', error);
+      console.warn('Sync error:', error);
       let errMsg = error.message || String(error);
       if (errMsg === 'Failed to fetch' || errMsg.includes('NetworkError')) {
         errMsg = 'Gagal sinkronisasi ke Cloud (Failed to fetch). Data disimpan lokal. Pastikan URL Apps Script benar dan diset ke "Anyone".';
@@ -357,7 +357,7 @@ Silahkan Datang Kembali!`;
         throw new Error(result.message || 'Gagal menarik data');
       }
     } catch (error: any) {
-      console.error('Pull error:', error);
+      console.warn('Pull error:', error);
       let errMsg = error.message || String(error);
       if (errMsg === 'Failed to fetch' || errMsg.includes('NetworkError')) {
         errMsg = 'Gagal terhubung ke Cloud (Failed to fetch). Pastikan:\n1. URL Apps Script benar.\n2. Akses diset ke "Anyone".\n3. Koneksi internet stabil.';
