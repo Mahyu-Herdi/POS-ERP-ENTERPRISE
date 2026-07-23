@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from './store';
 import { formatTanggalIndo } from './utils/dateFormatter';
-import { CheckCircle2, Check, Printer, ArrowLeft, Share2, Loader2, LogOut, Sun, Moon, SunMoon } from 'lucide-react';
+import { CheckCircle2, Check, Printer, ArrowLeft, Share2, Loader2, LogOut, Sun, Moon, SunMoon, Palette } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppModal } from './components/ModalContext';
 import jsQR from 'jsqr';
@@ -1044,7 +1044,9 @@ Silahkan Datang Kembali!`;
               <hr style={{ border: 0, borderTop: '2px solid rgba(163,177,198,0.3)', margin: '25px 0' }} />
               
               <div className="flex-between" style={{ marginBottom: '15px' }}>
-                <span style={{ fontWeight: 600, fontSize: '14px' }}>Tampilan Tema</span>
+                <span style={{ fontWeight: 600, fontSize: '14px' }}>
+                  Tema: {themeMode === 'neutral' ? 'Pasir Netral' : themeMode === 'light' ? 'Cokelat Klasik' : 'Cokelat Gelap'}
+                </span>
                 <button 
                   className="btn"
                   style={{ 
@@ -1083,7 +1085,13 @@ Silahkan Datang Kembali!`;
                       transition={{ duration: 0.2 }}
                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
-                      {themeMode === 'dark' ? <Moon size={18} /> : themeMode === 'light' ? <Sun size={18} /> : <SunMoon size={18} />}
+                      {themeMode === 'dark' ? (
+                        <Moon size={18} />
+                      ) : themeMode === 'light' ? (
+                        <Sun size={18} />
+                      ) : (
+                        <SunMoon size={18} />
+                      )}
                     </motion.div>
                   </AnimatePresence>
                 </button>
