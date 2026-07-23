@@ -33,46 +33,24 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   });
   const [inputValue, setInputValue] = useState('');
 
-  const parseAngka = (str: string) => {
-    return parseInt(String(str).replace(/\D/g, ''), 10) || 0;
-  };
-
-  const parseFloatCustom = (str: string) => {
-    return parseFloat(String(str).replace(/[^0-9.]/g, '')) || 0;
-  };
-
   const popup = (type: ModalType, msg: string, title = 'Informasi', data?: any) => {
     return new Promise<any>((resolve) => {
-      const fullMsg = title ? `${title}\n\n${msg}` : msg;
-      
-      if (type === 'alert') {
-        window.alert(fullMsg);
-        resolve(true);
-      } else if (type === 'confirm') {
-        const res = window.confirm(fullMsg);
-        resolve(res);
-      } else if (type === 'prompt_text') {
-        const res = window.prompt(fullMsg);
-        if (res === null) resolve('');
-        else resolve(res.trim());
-      } else if (type === 'prompt_num') {
-        const res = window.prompt(fullMsg);
-        if (res === null) resolve(0);
-        else resolve(parseAngka(res));
-      } else if (type === 'prompt_float') {
-        const res = window.prompt(fullMsg);
-        if (res === null) resolve(0);
-        else resolve(parseFloatCustom(res));
-      } else {
-        setInputValue('');
-        setModal({ isOpen: true, type, title, msg, resolve, data });
-      }
+      setInputValue('');
+      setModal({ isOpen: true, type, title, msg, resolve, data });
     });
   };
 
   const handleClose = (value: any) => {
     modal.resolve(value);
     setModal({ ...modal, isOpen: false });
+  };
+
+  const parseAngka = (str: string) => {
+    return parseInt(String(str).replace(/\D/g, ''), 10) || 0;
+  };
+
+  const parseFloatCustom = (str: string) => {
+    return parseFloat(String(str).replace(/[^0-9.]/g, '')) || 0;
   };
 
   const formatUang = (val: string) => {
