@@ -209,7 +209,7 @@ Silahkan Datang Kembali!`;
     return () => window.removeEventListener('navToKasir', handleNav);
   }, []);
 
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbyVu5LE4XCwKk2mtSvwt5SlZ7xiwyIkBolzKKuiYMBswqsqVRfNPWG0WnZGQiMtcaYC/exec"; // TEMPEL URL WEB APP APPS SCRIPT ANDA DI SINI
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbxrNOH0v3FGAsxyG6Rdf_Qt0U1sBdurGsXEg3nv7vqAVO7C1RhGeF7n81rrL2O0Xa1M/exec"; // TEMPEL URL WEB APP APPS SCRIPT ANDA DI SINI
 
 
   const isStaleUnsynced = () => {
