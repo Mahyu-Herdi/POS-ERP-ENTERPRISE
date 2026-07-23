@@ -301,7 +301,7 @@ export default function TabKasir() {
               </button>
               <button 
                 className="btn bg-green" 
-                style={{ flex: 1.5, margin: 0, padding: '12px', color: '#fff', fontWeight: 'bold', fontSize: '12px' }} 
+                style={{ flex: 1.5, margin: 0, padding: '12px', color: 'var(--text-main)', fontWeight: 'bold', fontSize: '12px' }} 
                 onClick={async () => {
                   setShowQrisModal(false);
                   await executeCheckout();
