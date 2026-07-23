@@ -830,14 +830,22 @@ Silahkan Datang Kembali!`;
                     placeholder="000201010211..." 
                     style={{ margin: 0, width: '100%', height: '80px', fontSize: '11px', resize: 'none' }}
                   />
-                  {toko.qrisStatis && (
-                    <div style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <span style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '8px' }}>Pratinjau QRIS:</span>
-                      <div style={{ padding: '10px', background: '#fff', borderRadius: '8px' }}>
-                        <QRCodeSVG value={toko.qrisStatis} size={150} />
-                      </div>
-                    </div>
-                  )}
+                  <AnimatePresence>
+                    {toko.qrisStatis && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+                      >
+                        <span style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '8px' }}>Pratinjau QRIS:</span>
+                        <div style={{ padding: '10px', background: '#fff', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                          <QRCodeSVG value={toko.qrisStatis} size={150} />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
