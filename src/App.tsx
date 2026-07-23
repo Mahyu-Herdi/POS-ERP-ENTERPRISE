@@ -23,6 +23,9 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem('pos_authenticated') === 'true';
   });
+  const [posRole, setPosRole] = useState(() => {
+    return localStorage.getItem('pos_role') || 'admin';
+  });
   const [loginPassword, setLoginPassword] = useState('');
   const [isLoginLoading, setIsLoginLoading] = useState(false);
 
@@ -668,9 +671,19 @@ Silahkan Datang Kembali!`;
     
     // Simulate slight delay for better UX and loading spinner feedback
     setTimeout(() => {
+      const pinKasir = toko.pinKasir || 'Kasir001';
       if (loginPassword === 'M24yu@mhy') {
         setIsAuthenticated(true);
         localStorage.setItem('pos_authenticated', 'true');
+        localStorage.setItem('pos_role', 'admin');
+        setPosRole('admin');
+      } else if (loginPassword === pinKasir) {
+        setIsAuthenticated(true);
+        localStorage.setItem('pos_authenticated', 'true');
+        localStorage.setItem('pos_role', 'kasir');
+        setPosRole('kasir');
+        setActiveTab('kasir');
+        localStorage.setItem('activeTab', 'kasir');
       } else {
         popup('alert', 'Sandi salah!', 'Gagal');
       }
@@ -872,6 +885,16 @@ Silahkan Datang Kembali!`;
                     placeholder="Masukkan Nama Toko" 
                     style={{ margin: 0, marginBottom: '15px', width: '100%' }}
                   />
+                  
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>PIN Kasir</label>
+                  <input 
+                    type="text" 
+                    className="btn-input" 
+                    value={toko.pinKasir || ''} 
+                    onChange={(e) => setToko({ pinKasir: e.target.value })} 
+                    placeholder="Kasir001" 
+                    style={{ margin: 0, marginBottom: '15px', width: '100%' }}
+                  />
 
                   <label style={{ fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>Upload Logo Toko (Lokal)</label>
                   <div style={{display: 'flex', gap: '10px'}}>
@@ -964,8 +987,9 @@ Silahkan Datang Kembali!`;
                 <span style={{ fontWeight: 600, fontSize: '14px', color: '#ef4444' }}>Akhiri Sesi (Logout)</span>
                 <button 
                   className="btn bg-red" 
-                  onClick={() => {
-                    if (window.confirm('Apakah Anda yakin ingin mengakhiri sesi login?')) {
+                  onClick={async () => {
+                    const confirmLogout = await popup('confirm', 'Apakah Anda yakin ingin mengakhiri sesi login?', 'Konfirmasi Logout');
+                    if (confirmLogout) {
                       localStorage.removeItem('pos_authenticated');
                       setIsAuthenticated(false);
                     }
@@ -1015,15 +1039,19 @@ Silahkan Datang Kembali!`;
         <button className={`nav-item ${activeTab === 'meja' ? 'active' : ''}`} onClick={() => setActiveTab('meja')}>
           <svg viewBox="0 0 24 24"><path d="M4 18h16V6H4v12zm9-10h5v3h-5V8zm-7 0h5v5H6V8zm0 7h5v1h-5v-1zm7-2h5v3h-5v-3z"/></svg> Denah
         </button>
-        <button className={`nav-item ${activeTab === 'stok' ? 'active' : ''}`} onClick={() => setActiveTab('stok')}>
-          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg> Stok
-        </button>
+        {posRole !== 'kasir' && (
+          <button className={`nav-item ${activeTab === 'stok' ? 'active' : ''}`} onClick={() => setActiveTab('stok')}>
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg> Stok
+          </button>
+        )}
         <button className={`nav-item ${activeTab === 'laporan' ? 'active' : ''}`} onClick={() => setActiveTab('laporan')}>
           <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg> Lap
         </button>
-        <button className={`nav-item ${activeTab === 'mesin' ? 'active' : ''}`} onClick={() => setActiveTab('mesin')}>
-          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> Master
-        </button>
+        {posRole !== 'kasir' && (
+          <button className={`nav-item ${activeTab === 'mesin' ? 'active' : ''}`} onClick={() => setActiveTab('mesin')}>
+            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> Master
+          </button>
+        )}
       </nav>
       </div>
       )}
@@ -1065,17 +1093,17 @@ Silahkan Datang Kembali!`;
                       await btPrinter.connect();
                     }
                     await btPrinter.print(text);
-                    alert("Struk berhasil dikirim ke printer bluetooth!");
+                    popup('alert', "Struk berhasil dikirim ke printer bluetooth!", "Berhasil");
                   } catch (err: any) {
                     let errMsg = err.message || String(err);
                     if (errMsg.includes("permissions policy") || errMsg.includes("disallowed")) {
-                      alert("Gagal menghubungkan Bluetooth:\n\nBrowser memblokir akses Bluetooth di dalam frame preview. Silakan klik tombol 'Open in new tab' (Buka di tab baru) di kanan atas layar untuk menggunakan fitur printer bluetooth secara langsung.");
+                      popup('alert', "Browser memblokir akses Bluetooth di dalam frame preview. Silakan klik tombol 'Open in new tab' (Buka di tab baru) di kanan atas layar untuk menggunakan fitur printer bluetooth secara langsung.", "Gagal menghubungkan Bluetooth");
                     } else if (errMsg.includes("cancelled") || errMsg.includes("cancel") || errMsg.includes("chooser")) {
                       // Silently log or display a gentle notice for user cancellation
                       console.log("Pencarian printer bluetooth dibatalkan oleh pengguna.");
                     } else {
                       console.error("Bluetooth print error:", err);
-                      alert("Gagal print bluetooth: " + errMsg);
+                      popup('alert', "Gagal print bluetooth: " + errMsg, "Error");
                     }
                   }
                 }} 
@@ -1127,7 +1155,7 @@ Silahkan Datang Kembali!`;
                 window.print();
               } catch (err) {
                 console.error("Gagal mencetak:", err);
-                alert("Pencetakan diblokir di sandbox iframe ini. Silakan buka aplikasi di tab baru (klik tombol 'Open in new tab' di kanan atas) atau gunakan tombol Share Struk.");
+                popup('alert', "Pencetakan diblokir di sandbox iframe ini. Silakan buka aplikasi di tab baru (klik tombol 'Open in new tab' di kanan atas) atau gunakan tombol Share Struk.", "Informasi");
               }
             }} 
             style={{ 
