@@ -2,25 +2,25 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: dark;
-  --bg-color: #FFFFFF;
-  --clay-bg: #875F43;
-  --input-bg: #3E2B1F;
-  --sub-card-bg: #4A3425;
-  --clay-shadow-out: 4px 4px 10px rgba(40, 20, 10, 0.4), -3px -3px 8px rgba(120, 85, 65, 0.2), inset 1px 1px 2px rgba(255, 255, 255, 0.2);
-  --clay-shadow-in: inset 4px 4px 8px rgba(40, 20, 10, 0.5), inset -2px -2px 6px rgba(120, 85, 65, 0.15);
-  --btn-shadow-out: 3px 3px 6px rgba(40, 20, 10, 0.4), -2px -2px 5px rgba(120, 85, 65, 0.2), inset 1px 1px 2px rgba(255, 255, 255, 0.2);
-  --text-main: #FFFFFF;
-  --text-muted: #DFCCBF;
-  --blue: #5CCFFF;
-  --red: #FF7575;
-  --green: #58E88F;
-  --orange: #FFA07A;
-  --purple: #D696FF;
+  color-scheme: light;
+  --bg-color: #F8F9FA;
+  --clay-bg: #FFFFFF;
+  --input-bg: #F1F3F5;
+  --sub-card-bg: #F8F9FA;
+  --clay-shadow-out: 4px 4px 12px rgba(165, 175, 190, 0.25), -3px -3px 8px rgba(255, 255, 255, 0.95), inset 1px 1px 2px rgba(255, 255, 255, 0.5);
+  --clay-shadow-in: inset 4px 4px 8px rgba(165, 175, 190, 0.3), inset -3px -3px 6px rgba(255, 255, 255, 0.9);
+  --btn-shadow-out: 3px 3px 6px rgba(165, 175, 190, 0.25), -2px -2px 5px rgba(255, 255, 255, 0.95), inset 1px 1px 2px rgba(255, 255, 255, 0.5);
+  --text-main: #111827;
+  --text-muted: #4B5563;
+  --blue: #0284C7;
+  --red: #DC2626;
+  --green: #16A34A;
+  --orange: #EA580C;
+  --purple: #7C3AED;
   --border-radius: 30px;
   --clay-border: none;
   --input-border: none;
-  --overlay-bg: rgba(62, 43, 31, 0.75);
+  --overlay-bg: rgba(17, 24, 39, 0.4);
 }
 
 body.neutral-mode {
@@ -33,12 +33,12 @@ body.neutral-mode {
   --clay-shadow-in: inset 4px 4px 8px rgba(185, 175, 160, 0.5), inset -3px -3px 6px rgba(255, 255, 255, 0.8);
   --btn-shadow-out: 3px 3px 6px rgba(185, 175, 160, 0.4), -2px -2px 5px rgba(255, 255, 255, 0.8), inset 1px 1px 2px rgba(255, 255, 255, 0.8);
   --text-main: #2D2A26;
-  --text-muted: #8C857B;
-  --blue: #0EA5E9;
-  --red: #EF4444;
-  --green: #10B981;
-  --orange: #F97316;
-  --purple: #A855F7;
+  --text-muted: #615B55;
+  --blue: #0284C7;
+  --red: #DC2626;
+  --green: #16A34A;
+  --orange: #EA580C;
+  --purple: #7C3AED;
   --clay-border: none;
   --input-border: none;
   --overlay-bg: rgba(45, 42, 38, 0.45);
@@ -135,7 +135,8 @@ header { padding: clamp(16px, 2vw, 24px) clamp(16px, 4vw, 32px); position: stick
   border-radius: 24px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .nav-item.active { box-shadow: var(--clay-shadow-in); color: var(--text-main); font-weight: 900; font-style: italic; transform: scale(1.05); border: none; }
-.nav-item svg { width: clamp(24px, 2vw, 24px); height: clamp(24px, 2vw, 24px); fill: currentColor; margin-bottom: 8px; pointer-events: none; }
+.nav-item svg { width: clamp(24px, 2vw, 24px); height: clamp(24px, 2vw, 24px); margin-bottom: 8px; pointer-events: none; }
+.nav-item svg:not([fill="none"]) { fill: currentColor; }
 
 table { width: 100%; border-collapse: separate; border-spacing: 0 clamp(8px, 1.5vw, 16px); margin-top: 16px; font-size: clamp(14px, 1.3vw, 16px); }
 th { color: var(--text-muted); font-weight: 700; text-align: left; padding: 0 clamp(8px, 1.5vw, 16px); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
