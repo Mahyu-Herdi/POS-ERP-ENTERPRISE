@@ -27,18 +27,19 @@ body.neutral-mode {
   color-scheme: light;
   --bg-color: #E6DFD1;
   --clay-bg: #F5EFEB;
-  --input-bg: #DCD3C3;
-  --sub-card-bg: #FCF9F2;
-  --clay-shadow-out: 4px 4px 10px rgba(185, 175, 160, 0.4), -3px -3px 8px rgba(255, 255, 255, 0.8), inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+  --input-bg: #DFCCBF;
+  --sub-card-bg: #EADCD3;
+  --clay-shadow-out: 6px 6px 15px rgba(185, 175, 160, 0.45), -4px -4px 12px rgba(255, 255, 255, 0.85), inset 1px 1px 2px rgba(255, 255, 255, 0.8);
   --clay-shadow-in: inset 4px 4px 8px rgba(185, 175, 160, 0.5), inset -3px -3px 6px rgba(255, 255, 255, 0.8);
   --btn-shadow-out: 3px 3px 6px rgba(185, 175, 160, 0.4), -2px -2px 5px rgba(255, 255, 255, 0.8), inset 1px 1px 2px rgba(255, 255, 255, 0.8);
   --text-main: #2D2A26;
-  --text-muted: #615B55;
-  --blue: #0284C7;
-  --red: #DC2626;
-  --green: #16A34A;
-  --orange: #EA580C;
-  --purple: #7C3AED;
+  --text-muted: #8C857B;
+  --blue: #0EA5E9;
+  --red: #EF4444;
+  --green: #10B981;
+  --orange: #F97316;
+  --purple: #A855F7;
+  --border-radius: 30px;
   --clay-border: none;
   --input-border: none;
   --overlay-bg: rgba(45, 42, 38, 0.45);
@@ -111,10 +112,10 @@ header { padding: clamp(16px, 2vw, 24px) clamp(16px, 4vw, 32px); position: stick
 .text-red { color: var(--text-main); font-style: italic; font-weight: normal; }
 .text-green { color: var(--text-main); font-style: italic; font-weight: 800; }
 .text-orange { color: var(--text-main); font-weight: 700; }
-.bg-blue { color: var(--text-main); font-weight: 900; }
-.bg-green { color: var(--text-main); font-style: italic; font-weight: 800; }
-.bg-red { color: var(--text-main); font-style: italic; font-weight: normal; }
-.bg-orange { color: var(--text-main); font-weight: 700; }
+.bg-blue { background: var(--blue) !important; color: #FFFFFF !important; font-weight: 900; }
+.bg-green { background: var(--green) !important; color: #FFFFFF !important; font-style: italic; font-weight: 800; }
+.bg-red { background: var(--red) !important; color: #FFFFFF !important; font-style: italic; font-weight: normal; }
+.bg-orange { background: var(--orange) !important; color: #FFFFFF !important; font-weight: 700; }
 .bg-dim { background: var(--sub-card-bg); box-shadow: var(--clay-shadow-in); border: none; border-radius: 24px; padding: clamp(16px, 2vw, 24px); }
 
 .split-layout { display: flex; flex-direction: column; gap: clamp(24px, 3vw, 40px); }
