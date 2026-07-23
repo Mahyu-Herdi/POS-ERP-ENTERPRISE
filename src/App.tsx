@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from './store';
 import { formatTanggalIndo } from './utils/dateFormatter';
-import { CheckCircle2, Check, Printer, ArrowLeft, Share2, Loader2, LogOut } from 'lucide-react';
+import { CheckCircle2, Check, Printer, ArrowLeft, Share2, Loader2, LogOut, Sun, Moon, SunMoon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppModal } from './components/ModalContext';
 import jsQR from 'jsqr';
@@ -665,30 +665,84 @@ Silahkan Datang Kembali!`;
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoginLoading(true);
-    
-    // Simulate slight delay for better UX and loading spinner feedback
-    setTimeout(() => {
-      const pinKasir = toko.pinKasir || 'Kasir001';
-      if (loginPassword === 'M24yu@mhy') {
-        setIsAuthenticated(true);
-        localStorage.setItem('pos_authenticated', 'true');
-        localStorage.setItem('pos_role', 'admin');
-        setPosRole('admin');
-      } else if (loginPassword === pinKasir) {
-        setIsAuthenticated(true);
-        localStorage.setItem('pos_authenticated', 'true');
-        localStorage.setItem('pos_role', 'kasir');
-        setPosRole('kasir');
-        setActiveTab('kasir');
-        localStorage.setItem('activeTab', 'kasir');
-      } else {
-        popup('alert', 'Sandi salah!', 'Gagal');
+
+    try {
+      if (!GAS_URL) {
+        // Fallback if URL Apps Script not configured yet
+        if (loginPassword === 'Admin123' || loginPassword === 'Kasir123') {
+          setIsAuthenticated(true);
+          localStorage.setItem('pos_authenticated', 'true');
+          const role = loginPassword === 'Admin123' ? 'admin' : 'kasir';
+          localStorage.setItem('pos_role', role);
+          setPosRole(role);
+          if (role === 'kasir') {
+            setActiveTab('kasir');
+            localStorage.setItem('activeTab', 'kasir');
+          }
+        } else {
+          await popup('alert', 'URL Apps Script belum diatur dan sandi default salah!', 'Gagal');
+        }
+        setIsLoginLoading(false);
+        return;
       }
+
+      const response = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        redirect: 'follow',
+        body: JSON.stringify({ type: 'CHECK_PASSWORD', password: loginPassword })
+      });
+
+      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+      const text = await response.text();
+      const result = JSON.parse(text);
+
+      if (result.status === 'success') {
+        const role = result.role || 'admin';
+        setIsAuthenticated(true);
+        localStorage.setItem('pos_authenticated', 'true');
+        localStorage.setItem('pos_role', role);
+        setPosRole(role);
+        if (role === 'kasir') {
+          setActiveTab('kasir');
+          localStorage.setItem('activeTab', 'kasir');
+        }
+      } else {
+        if (loginPassword === 'Admin123' || loginPassword === 'Kasir123') {
+          setIsAuthenticated(true);
+          localStorage.setItem('pos_authenticated', 'true');
+          const role = loginPassword === 'Admin123' ? 'admin' : 'kasir';
+          localStorage.setItem('pos_role', role);
+          setPosRole(role);
+          if (role === 'kasir') {
+            setActiveTab('kasir');
+            localStorage.setItem('activeTab', 'kasir');
+          }
+        } else {
+          await popup('alert', result.message || 'Sandi salah!', 'Gagal');
+        }
+      }
+    } catch (err) {
+      console.warn('Login error, fallback to offline default pins:', err);
+      if (loginPassword === 'Admin123' || loginPassword === 'Kasir123') {
+        setIsAuthenticated(true);
+        localStorage.setItem('pos_authenticated', 'true');
+        const role = loginPassword === 'Admin123' ? 'admin' : 'kasir';
+        localStorage.setItem('pos_role', role);
+        setPosRole(role);
+        if (role === 'kasir') {
+          setActiveTab('kasir');
+          localStorage.setItem('activeTab', 'kasir');
+        }
+      } else {
+        await popup('alert', 'Gagal terhubung ke Google Apps Script. Pastikan internet aktif atau gunakan sandi darurat (Admin123 / Kasir123).', 'Gagal Login');
+      }
+    } finally {
       setIsLoginLoading(false);
-    }, 600);
+    }
   };
 
   if (!isAuthenticated) {
@@ -885,16 +939,6 @@ Silahkan Datang Kembali!`;
                     placeholder="Masukkan Nama Toko" 
                     style={{ margin: 0, marginBottom: '15px', width: '100%' }}
                   />
-                  
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>PIN Kasir</label>
-                  <input 
-                    type="text" 
-                    className="btn-input" 
-                    value={toko.pinKasir || ''} 
-                    onChange={(e) => setToko({ pinKasir: e.target.value })} 
-                    placeholder="Kasir001" 
-                    style={{ margin: 0, marginBottom: '15px', width: '100%' }}
-                  />
 
                   <label style={{ fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>Upload Logo Toko (Lokal)</label>
                   <div style={{display: 'flex', gap: '10px'}}>
@@ -953,18 +997,22 @@ Silahkan Datang Kembali!`;
               <hr style={{ border: 0, borderTop: '2px solid rgba(163,177,198,0.3)', margin: '25px 0' }} />
               
               <div className="flex-between" style={{ marginBottom: '15px' }}>
-                <span style={{ fontWeight: 600, fontSize: '14px' }}>Integrasi Google Sheets</span>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button className="btn bg-green" style={{ padding: '8px 12px', fontSize: '12px' }} onClick={() => pullFromSheets(true)}>
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg> Sinkronisasi
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex-between" style={{ marginBottom: '15px' }}>
                 <span style={{ fontWeight: 600, fontSize: '14px' }}>Tampilan Tema</span>
                 <button 
-                  className="btn bg-blue" 
+                  className="btn"
+                  style={{ 
+                    padding: '8px', 
+                    borderRadius: '50%',
+                    background: 'var(--clay-bg)', 
+                    color: 'var(--text-main)', 
+                    boxShadow: 'var(--clay-shadow-out)',
+                    border: 'var(--clay-border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '36px',
+                    height: '36px'
+                  }}
                   onClick={() => {
                     let nextTheme = 'neutral';
                     if (themeMode === 'neutral') nextTheme = 'light';
@@ -979,7 +1027,18 @@ Silahkan Datang Kembali!`;
                     setThemeMode(nextTheme);
                   }}
                 >
-                  Mode: {themeMode === 'dark' ? 'Gelap' : themeMode === 'light' ? 'Terang' : 'Netral'}
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={themeMode}
+                      initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
+                      animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                      exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
+                      transition={{ duration: 0.2 }}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      {themeMode === 'dark' ? <Moon size={18} /> : themeMode === 'light' ? <Sun size={18} /> : <SunMoon size={18} />}
+                    </motion.div>
+                  </AnimatePresence>
                 </button>
               </div>
 
@@ -1050,6 +1109,17 @@ Silahkan Datang Kembali!`;
         {posRole !== 'kasir' && (
           <button className={`nav-item ${activeTab === 'mesin' ? 'active' : ''}`} onClick={() => setActiveTab('mesin')}>
             <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> Master
+          </button>
+        )}
+        {posRole === 'kasir' && (
+          <button className="nav-item" onClick={async () => {
+            const confirmLogout = await popup('confirm', 'Apakah Anda yakin ingin mengakhiri sesi login?', 'Konfirmasi Logout');
+            if (confirmLogout) {
+              localStorage.removeItem('pos_authenticated');
+              setIsAuthenticated(false);
+            }
+          }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: '24px', height: '24px' }}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg> Keluar
           </button>
         )}
       </nav>
