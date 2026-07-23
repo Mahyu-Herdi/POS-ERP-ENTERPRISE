@@ -37,6 +37,7 @@ export interface TokoData {
   spreadsheetId?: string;
   gasUrl?: string;
   qrisStatis?: string;
+  pinKasir?: string;
 }
 
 export interface HutangItem {
