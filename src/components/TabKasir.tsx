@@ -561,6 +561,44 @@ export default function TabKasir() {
             {metodeBayar === 'Cash' && (
               <div style={{ marginTop: '20px' }}>
                 <input type="text" inputMode="numeric" className="btn-input" placeholder="Uang Dibayar (Cash)" value={uangBayar} onChange={e => setUangBayar(formatUang(e.target.value))} />
+                <div style={{ display: 'flex', gap: '8px', marginTop: '10px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+                  {[100000, 50000, 20000, 10000, 5000].map(amount => (
+                    <button 
+                      key={amount}
+                      onClick={() => setUangBayar(formatUang(amount.toString()))}
+                      className="btn-shortcut"
+                      style={{ 
+                        flex: '0 0 auto', 
+                        padding: '6px 12px', 
+                        fontSize: '12px', 
+                        borderRadius: '16px', 
+                        border: '1px solid var(--border)', 
+                        background: 'var(--bg-card)',
+                        color: 'var(--text)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {amount.toLocaleString('id-ID')}
+                    </button>
+                  ))}
+                  <button 
+                    onClick={() => setUangBayar(formatUang(total.toString()))}
+                    className="btn-shortcut"
+                    style={{ 
+                      flex: '0 0 auto', 
+                      padding: '6px 12px', 
+                      fontSize: '12px', 
+                      borderRadius: '16px', 
+                      border: '1px solid var(--border)', 
+                      background: 'var(--bg-card)',
+                      color: 'var(--text)',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Uang Pas
+                  </button>
+                </div>
                 <div className="flex-between" style={{ marginTop: '15px' }}>
                   <span>Kembalian</span> <strong className="text-green" style={{ fontSize: '18px' }}>{uangBayar.trim() === '' ? '-' : `Rp ${kembalian.toLocaleString('id-ID')}`}</strong>
                 </div>
