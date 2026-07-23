@@ -5,6 +5,7 @@ import { CheckCircle2, Check, Printer, ArrowLeft, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppModal } from './components/ModalContext';
 import jsQR from 'jsqr';
+import { QRCodeSVG } from 'qrcode.react';
 import { btPrinter, formatReceipt } from './utils/bluetoothPrinter';
 
 import TabKasir from './components/TabKasir';
@@ -829,6 +830,14 @@ Silahkan Datang Kembali!`;
                     placeholder="000201010211..." 
                     style={{ margin: 0, width: '100%', height: '80px', fontSize: '11px', resize: 'none' }}
                   />
+                  {toko.qrisStatis && (
+                    <div style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '8px' }}>Pratinjau QRIS:</span>
+                      <div style={{ padding: '10px', background: '#fff', borderRadius: '8px' }}>
+                        <QRCodeSVG value={toko.qrisStatis} size={150} />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
