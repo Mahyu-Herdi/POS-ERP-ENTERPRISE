@@ -568,28 +568,51 @@ Silahkan Datang Kembali!`;
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const resetInput = () => {
+      e.target.value = '';
+    };
+
     try {
       const reader = new FileReader();
       reader.onload = (event) => {
         const img = new Image();
         img.onload = async () => {
           const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
+          
+          let width = img.width;
+          let height = img.height;
+          const MAX_DIM = 1000;
+          if (width > MAX_DIM || height > MAX_DIM) {
+            const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
+
+          canvas.width = width;
+          canvas.height = height;
           const ctx = canvas.getContext('2d');
           if (!ctx) {
             await popup('alert', "Gagal menginisialisasi canvas untuk membaca QR Code.", "Gagal");
+            resetInput();
             return;
           }
-          ctx.drawImage(img, 0, 0);
-          const imageData = ctx.getImageData(0, 0, img.width, img.height);
-          const code = jsQR(imageData.data, imageData.width, imageData.height);
+          
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          const imageData = ctx.getImageData(0, 0, width, height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "attemptBoth",
+          });
+          
           if (code && code.data) {
             setToko({ qrisStatis: code.data });
             await popup('alert', `QRIS Statis berhasil dideteksi dan diekstrak!\n\nPayload: ${code.data}`, "Berhasil");
           } else {
-            await popup('alert', "Gagal membaca QR Code dari gambar QRIS Statis. Pastikan gambar memiliki QR Code yang jelas dan tidak terpotong.", "Gagal Membaca");
+            await popup('alert', "Gagal membaca QR Code dari gambar QRIS Statis. Pastikan gambar memiliki resolusi baik, tidak terpotong, atau coba unggah gambar yang lebih jelas.", "Gagal Membaca");
           }
+          resetInput();
         };
         img.src = event.target?.result as string;
       };
@@ -597,6 +620,7 @@ Silahkan Datang Kembali!`;
     } catch (err) {
       console.error(err);
       await popup('alert', "Terjadi kesalahan saat memproses gambar.", "Error");
+      resetInput();
     }
   };
 
