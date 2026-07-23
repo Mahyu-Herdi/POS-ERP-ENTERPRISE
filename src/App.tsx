@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from './store';
 import { formatTanggalIndo } from './utils/dateFormatter';
-import { CheckCircle2, Check, Printer, ArrowLeft, Share2 } from 'lucide-react';
+import { CheckCircle2, Check, Printer, ArrowLeft, Share2, Loader2, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppModal } from './components/ModalContext';
 import jsQR from 'jsqr';
@@ -24,6 +24,7 @@ export default function App() {
     return localStorage.getItem('pos_authenticated') === 'true';
   });
   const [loginPassword, setLoginPassword] = useState('');
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
 
   const [activeSubTab, setActiveSubTab] = useState('sub-sistem');
   const [isSaving, setIsSaving] = useState(false);
@@ -389,6 +390,25 @@ Silahkan Datang Kembali!`;
     else if (savedTheme === 'neutral') document.body.classList.add('neutral-mode');
     
     const initSyncAndPull = async () => {
+      // Deteksi first load atau jika data penjelajahan dihapus
+      if (!localStorage.getItem('pos_setup_complete')) {
+        console.log('First load (or browser data cleared) detected. Forcing clean pull from cloud.');
+        isPullingRef.current = true; // Block watchers
+        
+        // Hapus data sinkronisasi lokal yang mungkin tersisa
+        localStorage.removeItem('pos_unsynced');
+        localStorage.removeItem('pos_last_change_time');
+        
+        if (GAS_URL && navigator.onLine) {
+          await pullFromSheets(false);
+        } else {
+          popup('alert', 'Aplikasi mendeteksi ini adalah akses pertama kali (atau data penjelajahan baru dihapus). Hubungkan ke internet untuk memuat data awal dari Cloud!', 'Perhatian Offline');
+        }
+        
+        setTimeout(() => { isPullingRef.current = false; }, 1000);
+        return;
+      }
+
       if (GAS_URL) {
         if (navigator.onLine) {
           const isUnsynced = isStaleUnsynced();
@@ -433,6 +453,11 @@ Silahkan Datang Kembali!`;
     
     if (isPullingRef.current) {
       console.log('Watcher: State change ignored because it was triggered by pulling from cloud.');
+      return;
+    }
+
+    if (localStorage.getItem('pos_setup_complete') !== 'true') {
+      console.log('Watcher: State change ignored because app has not completed initial pull.');
       return;
     }
     
@@ -639,12 +664,18 @@ Silahkan Datang Kembali!`;
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (loginPassword === 'M24yu@mhy') {
-      setIsAuthenticated(true);
-      localStorage.setItem('pos_authenticated', 'true');
-    } else {
-      popup('alert', 'Sandi salah!', 'Gagal');
-    }
+    setIsLoginLoading(true);
+    
+    // Simulate slight delay for better UX and loading spinner feedback
+    setTimeout(() => {
+      if (loginPassword === 'M24yu@mhy') {
+        setIsAuthenticated(true);
+        localStorage.setItem('pos_authenticated', 'true');
+      } else {
+        popup('alert', 'Sandi salah!', 'Gagal');
+      }
+      setIsLoginLoading(false);
+    }, 600);
   };
 
   if (!isAuthenticated) {
@@ -660,8 +691,12 @@ Silahkan Datang Kembali!`;
             className="btn-input"
             autoFocus
           />
-          <button type="submit" className="btn text-blue" style={{ marginTop: '10px' }}>
-            <Check size={20} /> Masuk
+          <button type="submit" className="btn text-blue" style={{ marginTop: '10px' }} disabled={isLoginLoading}>
+            {isLoginLoading ? (
+              <><Loader2 size={20} className="animate-spin" /> Sedang Memproses...</>
+            ) : (
+              <><Check size={20} /> Masuk</>
+            )}
           </button>
         </form>
       </div>
@@ -903,7 +938,7 @@ Silahkan Datang Kembali!`;
                 </div>
               </div>
 
-              <div className="flex-between">
+              <div className="flex-between" style={{ marginBottom: '15px' }}>
                 <span style={{ fontWeight: 600, fontSize: '14px' }}>Tampilan Tema</span>
                 <button 
                   className="btn bg-blue" 
@@ -922,6 +957,21 @@ Silahkan Datang Kembali!`;
                   }}
                 >
                   Mode: {themeMode === 'dark' ? 'Gelap' : themeMode === 'light' ? 'Terang' : 'Netral'}
+                </button>
+              </div>
+
+              <div className="flex-between" style={{ paddingTop: '15px', borderTop: '1px solid var(--border-color)' }}>
+                <span style={{ fontWeight: 600, fontSize: '14px', color: '#ef4444' }}>Akhiri Sesi (Logout)</span>
+                <button 
+                  className="btn bg-red" 
+                  onClick={() => {
+                    if (window.confirm('Apakah Anda yakin ingin mengakhiri sesi login?')) {
+                      localStorage.removeItem('pos_authenticated');
+                      setIsAuthenticated(false);
+                    }
+                  }}
+                >
+                  <LogOut size={16} />
                 </button>
               </div>
             </motion.div>
