@@ -747,7 +747,54 @@ Silahkan Datang Kembali!`;
 
   if (!isAuthenticated) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-color)', padding: '20px' }}>
+      <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-color)', padding: '20px' }}>
+        <button
+          type="button"
+          className="btn"
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            borderRadius: '50%',
+            background: 'var(--clay-bg)', 
+            color: 'var(--text-main)', 
+            boxShadow: 'var(--clay-shadow-out)',
+            border: 'var(--clay-border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '40px',
+            height: '40px',
+            zIndex: 10
+          }}
+          onClick={() => {
+            let nextTheme = 'neutral';
+            if (themeMode === 'neutral') nextTheme = 'light';
+            else if (themeMode === 'light') nextTheme = 'dark';
+            else if (themeMode === 'dark') nextTheme = 'neutral';
+            
+            document.body.classList.remove('dark-mode', 'neutral-mode');
+            if (nextTheme === 'dark') document.body.classList.add('dark-mode');
+            else if (nextTheme === 'neutral') document.body.classList.add('neutral-mode');
+            
+            localStorage.setItem('pos_theme', nextTheme);
+            setThemeMode(nextTheme);
+          }}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={themeMode}
+              initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
+              animate={{ opacity: 1, rotate: 0, scale: 1 }}
+              exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
+              transition={{ duration: 0.2 }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              {themeMode === 'dark' ? <Moon size={20} /> : themeMode === 'light' ? <Sun size={20} /> : <SunMoon size={20} />}
+            </motion.div>
+          </AnimatePresence>
+        </button>
+
         <form onSubmit={handleLogin} className="clay-card" style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <h2 style={{ textAlign: 'center', margin: 0 }}>Login Smart POS</h2>
           <input 
