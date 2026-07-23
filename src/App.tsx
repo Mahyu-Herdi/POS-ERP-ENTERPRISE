@@ -433,7 +433,7 @@ Silahkan Datang Kembali!`;
         if (navigator.onLine) {
           await syncToSheets(false);
         }
-      }, 1500);
+      }, 500);
       return () => clearTimeout(timeout);
     }
   }, [toko.qrisStatis, toko.nama, toko.logoBase64, menu, stokData, transaksiList, hutangList, bebanAktif, keuangan, mejaAktif, stokHistory]);
@@ -474,10 +474,10 @@ Silahkan Datang Kembali!`;
 
     const resetIdleTimer = () => {
       clearTimeout(idleTimer);
-      // Jika pengguna tidak melakukan apa-apa selama 3 detik, kita bersiap pull background (cooldown minimal 10 detik sekali)
+      // Jika pengguna tidak melakukan apa-apa selama 1 detik, kita bersiap pull background (cooldown minimal 3 detik sekali)
       idleTimer = setTimeout(() => {
         const now = Date.now();
-        if (GAS_URL && navigator.onLine && (now - lastPullTime > 10000)) {
+        if (GAS_URL && navigator.onLine && (now - lastPullTime > 3000)) {
           const isUnsynced = isStaleUnsynced();
           if (!isSaving && !isPullingBg && !isSyncingBg) {
             if (isUnsynced) {
@@ -488,10 +488,10 @@ Silahkan Datang Kembali!`;
             lastPullTime = Date.now();
           }
         }
-      }, 3000);
+      }, 1000);
     };
 
-    // Polling background berkala setiap 15 detik
+    // Polling background berkala setiap 5 detik
     pollInterval = setInterval(() => {
       const isUnsynced = isStaleUnsynced();
       if (GAS_URL && navigator.onLine && !isSaving && !isPullingBg && !isSyncingBg) {
@@ -502,7 +502,7 @@ Silahkan Datang Kembali!`;
         }
         lastPullTime = Date.now();
       }
-    }, 15000);
+    }, 5000);
 
     // Activity listeners
     window.addEventListener('mousemove', resetIdleTimer);
