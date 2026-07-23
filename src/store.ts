@@ -16,6 +16,7 @@ export interface MenuItem {
   resep: any[];
   hppBahan?: number;
   hppOp?: number;
+  isRekomendasi?: boolean;
 }
 
 export interface CartItem extends MenuItem {
