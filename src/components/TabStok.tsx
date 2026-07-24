@@ -122,7 +122,7 @@ export default function TabStok() {
       match = match && itemDate === filterAkhir;
     }
     if (searchName) {
-      match = match && d.item.toLowerCase().includes(searchName.toLowerCase());
+      match = match && (d.item || d.nama || '').toLowerCase().includes(searchName.toLowerCase());
     }
     return match;
   }).reverse();
@@ -159,7 +159,7 @@ export default function TabStok() {
       head: [['Waktu (Hari, Tgl, Jam)', 'Item', 'Keterangan/Tipe', 'Qty']],
       body: stokMasuk.map(h => [
         formatWaktu(h.tgl),
-        h.item,
+        h.item || h.nama,
         h.tipe,
         `+${h.qty}`
       ]),
@@ -178,7 +178,7 @@ export default function TabStok() {
       head: [['Waktu (Hari, Tgl, Jam)', 'Item', 'Keterangan/Tipe', 'Qty']],
       body: stokKeluar.map(h => [
         formatWaktu(h.tgl),
-        h.item,
+        h.item || h.nama,
         h.tipe,
         `-${h.qty}`
       ]),
@@ -191,74 +191,80 @@ export default function TabStok() {
   };
 
   return (
-    <>
-      <div className="clay-card">
-        <div className="flex-between">
-          <h3 style={{ color: 'var(--text-muted)' }}>Manajemen Item Stok & Bahan Baku</h3>
-          <button className="btn bg-green" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={bikinStokBaru}>
-            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Item Baru
-          </button>
+    <div className="split-layout">
+      <div className="left-panel">
+        <div className="clay-card">
+          <div className="flex-between">
+            <h3 style={{ color: 'var(--text-muted)' }}>Manajemen Item Stok & Bahan Baku</h3>
+            <button className="btn bg-green" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={bikinStokBaru}>
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Item Baru
+            </button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Bahan</th><th>Est. Harga/Unit</th><th>Sisa Stok</th><th style={{ textAlign: 'right' }}>Aksi</th></tr>
+            </thead>
+            <tbody>
+              {stokData.length === 0 ? (
+                <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>Belum ada item stok.</td></tr>
+              ) : (
+                stokData.map((s, i) => (
+                  <tr key={s.id}>
+                    <td><strong>{s.nama}</strong></td>
+                    <td>Rp {s.hargaPerUnit.toLocaleString('id-ID')}/{s.unit}</td>
+                    <td>{s.sisa} {s.unit}</td>
+                    <td style={{ textAlign: 'right', display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                      <button className="btn bg-red" style={{ padding: '4px 8px', borderRadius: '8px' }} onClick={() => handleKurangStok(i)}>
+                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                      </button> 
+                      <button className="btn bg-blue" style={{ padding: '4px 8px', borderRadius: '8px' }} onClick={() => handleTambahStok(i)}>
+                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                      </button>
+                      <button className="btn bg-orange" style={{ padding: '4px 8px', borderRadius: '8px', color: 'var(--text-main)', fontSize: '11px' }} onClick={() => handleHapusStok(i)}>Hapus</button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-        <table>
-          <thead>
-            <tr><th>Bahan</th><th>Est. Harga/Unit</th><th>Sisa Stok</th><th style={{ textAlign: 'right' }}>Aksi</th></tr>
-          </thead>
-          <tbody>
-            {stokData.length === 0 ? (
-              <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>Belum ada item stok.</td></tr>
-            ) : (
-              stokData.map((s, i) => (
-                <tr key={s.id}>
-                  <td><strong>{s.nama}</strong></td>
-                  <td>Rp {s.hargaPerUnit.toLocaleString('id-ID')}/{s.unit}</td>
-                  <td>{s.sisa} {s.unit}</td>
-                  <td style={{ textAlign: 'right', display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                    <button className="btn bg-red" style={{ padding: '4px 8px', borderRadius: '8px' }} onClick={() => handleKurangStok(i)}>
-                      <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    </button> 
-                    <button className="btn bg-blue" style={{ padding: '4px 8px', borderRadius: '8px' }} onClick={() => handleTambahStok(i)}>
-                      <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    </button>
-                    <button className="btn bg-orange" style={{ padding: '4px 8px', borderRadius: '8px', color: 'var(--text-main)', fontSize: '11px' }} onClick={() => handleHapusStok(i)}>Hapus</button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
       </div>
       
-      <div className="clay-card">
-        <div className="flex-between" style={{ marginBottom: '15px' }}>
-          <h3 style={{ color: 'var(--text-muted)', margin: 0 }}>Riwayat Mutasi Stok</h3>
-          <button className="btn bg-blue" style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }} onClick={handleCetakPDF}>
-            <Download size={14} /> Cetak PDF
-          </button>
+      <div className="right-panel">
+        <div className="clay-card">
+          <div className="flex-between" style={{ marginBottom: '15px' }}>
+            <h3 style={{ color: 'var(--text-muted)', margin: 0 }}>Riwayat Mutasi Stok</h3>
+            <button className="btn bg-blue" style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }} onClick={handleCetakPDF}>
+              <Download size={14} /> Cetak PDF
+            </button>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', flexWrap: 'wrap' }}>
+            <input type="text" placeholder="Cari nama..." value={searchName} onChange={e => setSearchName(e.target.value)} className="btn-input" style={{ margin: 0, fontSize: '12px', flex: 1, minWidth: '120px' }} />
+            <CustomDatePicker value={filterMulai} onChange={setFilterMulai} placeholder="Mulai Tgl" className="btn-input" style={{ margin: 0, fontSize: '12px', width: '110px' }} />
+            <CustomDatePicker value={filterAkhir} onChange={setFilterAkhir} placeholder="Akhir Tgl" className="btn-input" style={{ margin: 0, fontSize: '12px', width: '110px' }} />
+            <button className="btn bg-dim" style={{ margin: 0, padding: '10px 15px', fontSize: '12px', color: 'var(--text-main)' }} onClick={() => { setFilterMulai(''); setFilterAkhir(''); setSearchName(''); }}>Reset</button>
+          </div>
+          <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+            <table>
+              <thead><tr><th>Tgl</th><th>Item</th><th>Tipe</th><th>Qty</th></tr></thead>
+              <tbody>
+                {filteredHistory.length === 0 ? (
+                  <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>Tidak ada mutasi</td></tr>
+                ) : (
+                  filteredHistory.map((h, idx) => (
+                    <tr key={idx}>
+                      <td style={{ fontSize: '11px' }}>{formatTanggalIndo(h.tgl)}</td>
+                      <td><strong>{h.item || h.nama}</strong></td>
+                      <td className={h.tipe.includes('Masuk') ? 'text-green' : 'text-red'} style={{ fontSize: '11px', fontWeight: 'bold' }}>{h.tipe}</td>
+                      <td>{h.qty}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-          <input type="text" placeholder="Cari nama..." value={searchName} onChange={e => setSearchName(e.target.value)} className="btn-input" style={{ margin: 0, fontSize: '12px', flex: 1 }} />
-          <CustomDatePicker value={filterMulai} onChange={setFilterMulai} placeholder="Mulai Tgl" className="btn-input" style={{ margin: 0, fontSize: '12px', width: '130px' }} />
-          <CustomDatePicker value={filterAkhir} onChange={setFilterAkhir} placeholder="Akhir Tgl" className="btn-input" style={{ margin: 0, fontSize: '12px', width: '130px' }} />
-          <button className="btn bg-dim" style={{ margin: 0, padding: '10px 15px', fontSize: '12px', color: 'var(--text-main)' }} onClick={() => { setFilterMulai(''); setFilterAkhir(''); setSearchName(''); }}>Reset</button>
-        </div>
-        <table>
-          <thead><tr><th>Tgl</th><th>Item</th><th>Tipe</th><th>Qty</th></tr></thead>
-          <tbody>
-            {filteredHistory.length === 0 ? (
-              <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>Tidak ada mutasi</td></tr>
-            ) : (
-              filteredHistory.map((h, idx) => (
-                <tr key={idx}>
-                  <td style={{ fontSize: '11px' }}>{formatTanggalIndo(h.tgl)}</td>
-                  <td><strong>{h.item}</strong></td>
-                  <td className={h.tipe.includes('Masuk') ? 'text-green' : 'text-red'} style={{ fontSize: '11px', fontWeight: 'bold' }}>{h.tipe}</td>
-                  <td>{h.qty}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
       </div>
-    </>
+    </div>
   );
 }
