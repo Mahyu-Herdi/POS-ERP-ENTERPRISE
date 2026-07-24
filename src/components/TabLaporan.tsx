@@ -147,7 +147,27 @@ export default function TabLaporan() {
 
   const bayarHutang = async (idx: number) => {
     const h = hutangList[idx];
-    const jumlah = await popup('prompt_float', `Sisa hutang ${h.nama}: Rp ${h.sisa.toLocaleString('id-ID')}.\nBayar berapa?`, "Bayar Kasbon");
+    
+    const riwayatTxs = transaksiList.filter((tx: any) => tx.tipe === 'Kasbon' && tx.ident?.trim().toLowerCase() === h.nama?.trim().toLowerCase());
+    let rincianItems = "";
+    riwayatTxs.forEach((tx: any) => {
+      rincianItems += `\n[${formatTanggalIndo(tx.tgl)}]\n`;
+      if (tx.items && tx.items.length > 0) {
+        tx.items.forEach((it: any) => {
+           rincianItems += `- ${it.nama || it.name} x${it.qty}\n`;
+        });
+      } else {
+        rincianItems += `- Transaksi: Rp ${tx.total.toLocaleString('id-ID')}\n`;
+      }
+    });
+    
+    if (!rincianItems) {
+      rincianItems = "\n- (Tidak ada rincian item yg tercatat di riwayat transaksi)\n";
+    }
+
+    const maxTampil = rincianItems.length > 500 ? rincianItems.substring(0, 500) + "...\n(Lihat riwayat untuk selengkapnya)" : rincianItems;
+
+    const jumlah = await popup('prompt_float', `Rincian Item:${maxTampil}\nSisa hutang ${h.nama}: Rp ${h.sisa.toLocaleString('id-ID')}.\nBayar berapa?`, "Bayar Kasbon");
     
     if (jumlah && jumlah > 0 && jumlah <= h.sisa) {
       updateKeuangan({ masuk: keuangan.masuk + jumlah });
@@ -382,15 +402,19 @@ export default function TabLaporan() {
       <div className="clay-card">
         <h3 style={{ color: 'var(--text-muted)' }}>Manajemen Hutang / Kasbon</h3>
         <table>
-          <thead><tr><th>Nama / Meja</th><th>Nominal</th><th style={{ textAlign: 'right' }}>Aksi</th></tr></thead>
+          <thead><tr><th>Waktu (Terakhir)</th><th>Nama / Meja</th><th>Nominal</th><th style={{ textAlign: 'right' }}>Aksi</th></tr></thead>
           <tbody>
             {filteredHutang.length === 0 ? (
-              <tr><td colSpan={3} style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>Tidak ada kasbon aktif.</td></tr>
+              <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>Tidak ada kasbon aktif.</td></tr>
             ) : (
               filteredHutang.map((h, i) => {
                 const originalIdx = hutangList.findIndex(x => x.id === h.id);
+                const txTerakhir = transaksiList.filter((tx: any) => tx.tipe === 'Kasbon' && tx.ident?.trim().toLowerCase() === h.nama?.trim().toLowerCase()).pop();
+                const waktuTampil = txTerakhir && txTerakhir.tgl ? txTerakhir.tgl : h.tglRaw;
+                
                 return (
                   <tr key={h.id}>
+                    <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{formatTanggalIndo(waktuTampil)}</td>
                     <td><strong>{h.nama}</strong></td>
                     <td className="text-red" style={{ fontWeight: 600 }}>Rp {h.sisa.toLocaleString('id-ID')}</td>
                     <td style={{ textAlign: 'right' }}>
