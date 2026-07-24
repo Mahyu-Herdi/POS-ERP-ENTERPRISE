@@ -21,6 +21,7 @@ export default function TabStok() {
   const [filterMulai, setFilterMulai] = useState(getToday());
   const [filterAkhir, setFilterAkhir] = useState(getToday());
   const [searchName, setSearchName] = useState('');
+  const [posRole] = useState(() => localStorage.getItem('pos_role') || 'admin');
   const { popup } = useAppModal();
 
   const catatMutasi = (stokId: string, nama: string, tipe: string, qty: number, sisaSebelum: number, sisaSetelah: number, txId?: string) => {
@@ -196,32 +197,36 @@ export default function TabStok() {
         <div className="clay-card">
           <div className="flex-between">
             <h3 style={{ color: 'var(--text-muted)' }}>Manajemen Item Stok & Bahan Baku</h3>
-            <button className="btn bg-green" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={bikinStokBaru}>
-              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Item Baru
-            </button>
+            {posRole !== 'kasir' && (
+              <button className="btn bg-green" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={bikinStokBaru}>
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Item Baru
+              </button>
+            )}
           </div>
           <table>
             <thead>
-              <tr><th>Bahan</th><th>Est. Harga/Unit</th><th>Sisa Stok</th><th style={{ textAlign: 'right' }}>Aksi</th></tr>
+              <tr><th>Bahan</th><th>Est. Harga/Unit</th><th>Sisa Stok</th>{posRole !== 'kasir' && <th style={{ textAlign: 'right' }}>Aksi</th>}</tr>
             </thead>
             <tbody>
               {stokData.length === 0 ? (
-                <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>Belum ada item stok.</td></tr>
+                <tr><td colSpan={posRole !== 'kasir' ? 4 : 3} style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>Belum ada item stok.</td></tr>
               ) : (
                 stokData.map((s, i) => (
                   <tr key={s.id}>
                     <td><strong>{s.nama}</strong></td>
                     <td>Rp {s.hargaPerUnit.toLocaleString('id-ID')}/{s.unit}</td>
                     <td>{s.sisa} {s.unit}</td>
-                    <td style={{ textAlign: 'right', display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                      <button className="btn bg-red" style={{ padding: '4px 8px', borderRadius: '8px' }} onClick={() => handleKurangStok(i)}>
-                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                      </button> 
-                      <button className="btn bg-blue" style={{ padding: '4px 8px', borderRadius: '8px' }} onClick={() => handleTambahStok(i)}>
-                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                      </button>
-                      <button className="btn bg-orange" style={{ padding: '4px 8px', borderRadius: '8px', color: 'var(--text-main)', fontSize: '11px' }} onClick={() => handleHapusStok(i)}>Hapus</button>
-                    </td>
+                    {posRole !== 'kasir' && (
+                      <td style={{ textAlign: 'right', display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                        <button className="btn bg-red" style={{ padding: '4px 8px', borderRadius: '8px' }} onClick={() => handleKurangStok(i)}>
+                          <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button> 
+                        <button className="btn bg-blue" style={{ padding: '4px 8px', borderRadius: '8px' }} onClick={() => handleTambahStok(i)}>
+                          <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                        <button className="btn bg-orange" style={{ padding: '4px 8px', borderRadius: '8px', color: 'var(--text-main)', fontSize: '11px' }} onClick={() => handleHapusStok(i)}>Hapus</button>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
