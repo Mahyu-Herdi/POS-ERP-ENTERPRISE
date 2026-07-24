@@ -79,5 +79,5 @@ export function formatTanggalIndo(dateStr: string | undefined | null): string {
   const jam = String(d.getHours()).padStart(2, '0');
   const menit = String(d.getMinutes()).padStart(2, '0');
 
-  return `${hari}, ${tanggal} ${bulan} ${tahun} - ${jam}.${menit}`;
+  return `${hari}, ${tanggal} ${bulan} ${tahun} Jam ${jam}.${menit}`;
 }
