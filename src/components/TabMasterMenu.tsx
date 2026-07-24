@@ -298,7 +298,7 @@ export default function TabMasterMenu() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <strong>{m.name}</strong>
                 </div>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>({m.resep && m.resep.length > 0 ? `${m.resep.length} Bahan baku` : 'Tanpa resep'})</span> 
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>({m.resep && m.resep.length > 0 ? m.resep.map(r => `${r.nama} (${r.qty}${r.unit})`).join(', ') : 'Tanpa resep'})</span> 
                 <br /><span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Modal Bahan: Rp {(m.hppBahan || 0).toLocaleString('id-ID')} | Beban Ops: Rp {(m.hppOp || 0).toLocaleString('id-ID')}</span>
                 <br /><span className="text-blue" style={{ fontSize: '12px' }}>Harga Jual: Rp {m.harga.toLocaleString('id-ID')}</span>
               </div>
