@@ -6,7 +6,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { generateDynamicQRIS } from '../utils/qris';
 
 export default function TabKasir() {
-  const { menu, cart, addToCart, updateCartQty, toggleCartBayar, setOrderMode, orderMode, mejaAktif, setMejaAktif, totalMeja, addTransaksi, keuangan, updateKeuangan, stokData, updateStok, addStokHistory, addHutang, toko } = useStore();
+  const { menu, cart, addToCart, updateCartQty, toggleCartBayar, setOrderMode, orderMode, mejaAktif, setMejaAktif, totalMeja, addTransaksi, keuangan, updateKeuangan, stokData, updateStok, addStokHistory, addHutang, toko, transaksiList } = useStore();
   const [search, setSearch] = useState('');
   const [identifier, setIdentifier] = useState('');
   const [diskon, setDiskon] = useState('0');
@@ -38,8 +38,23 @@ export default function TabKasir() {
 
   const parseAngka = (val: string) => parseInt(val.replace(/\D/g, ''), 10) || 0;
 
-  const filteredMenu = menu.filter(m => m.name.toLowerCase().includes(search.toLowerCase()));
-  const recommendedMenu = menu.filter(m => m.isRekomendasi);
+  const orderFrequencies = React.useMemo(() => {
+    const freqs: Record<string, number> = {};
+    transaksiList.forEach(tx => {
+      if (tx.tipe === 'Penjualan' || tx.tipe === 'Kasbon') {
+        tx.items?.forEach((item: any) => {
+          if (item.id) {
+            freqs[item.id] = (freqs[item.id] || 0) + item.qty;
+          }
+        });
+      }
+    });
+    return freqs;
+  }, [transaksiList]);
+
+  const filteredMenu = menu
+    .filter(m => m.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => (orderFrequencies[b.id] || 0) - (orderFrequencies[a.id] || 0));
 
   const subtotal = cart.reduce((acc, c) => acc + (c.bayar ? c.harga * c.qty : 0), 0);
   const diskonNum = parseAngka(diskon);
@@ -345,45 +360,6 @@ export default function TabKasir() {
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
-
-            {recommendedMenu.length > 0 && !search && (
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="var(--orange)" stroke="none">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                  </svg>
-                  <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>REKOMENDASI MENU</span>
-                </div>
-                <div className="grid-view" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '10px', marginBottom: '5px' }}>
-                  {recommendedMenu.map(m => (
-                    <div 
-                      key={`rec-${m.id}`} 
-                      className="btn" 
-                      style={{ 
-                        textAlign: 'left', 
-                        flexDirection: 'column', 
-                        alignItems: 'flex-start', 
-                        gap: '4px',
-                        background: 'rgba(234, 88, 12, 0.08)',
-                        border: '1px solid rgba(234, 88, 12, 0.2)',
-                        position: 'relative',
-                        padding: '12px'
-                      }} 
-                      onClick={() => addToCart(m)}
-                    >
-                      <div style={{ position: 'absolute', top: '8px', right: '8px' }}>
-                        <svg viewBox="0 0 24 24" width="12" height="12" fill="var(--orange)" stroke="none">
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                        </svg>
-                      </div>
-                      <div style={{ fontSize: '13px', fontWeight: 900, paddingRight: '12px', lineHeight: '1.2' }}>{m.name}</div>
-                      <div className="text-blue" style={{ fontSize: '12px', fontWeight: 900 }}>Rp {m.harga.toLocaleString('id-ID')}</div>
-                    </div>
-                  ))}
-                </div>
-                <hr style={{ border: 0, borderTop: '2px dashed rgba(163, 177, 198, 0.2)', margin: '15px 0' }} />
-              </div>
-            )}
 
             <div className="grid-view">
               {filteredMenu.length === 0 ? (
