@@ -107,7 +107,7 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({ children }) =
               {modal.msg}
             </p>
           ) : (
-            <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.5', marginBottom: '20px', whiteSpace: 'pre-line' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.5', marginBottom: '20px', whiteSpace: 'pre-line', maxHeight: '320px', overflowY: 'auto', textAlign: 'left', padding: '10px', background: 'rgba(0,0,0,0.02)', borderRadius: '12px' }}>
               {modal.msg}
             </p>
           )}
@@ -126,7 +126,7 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           )}
 
           <div style={{ display: 'flex', gap: '15px', marginTop: '25px' }}>
-            {(modal.type === 'confirm' || modal.type === 'print_confirm' || modal.type === 'prompt_text' || modal.type === 'prompt_num' || modal.type === 'receipt_detail') && (
+            {(modal.type === 'confirm' || modal.type === 'print_confirm' || modal.type === 'prompt_text' || modal.type === 'prompt_num' || modal.type === 'prompt_float' || modal.type === 'receipt_detail') && (
               <button
                 className="btn bg-red"
                 style={{ flex: 1, display: 'block' }}
