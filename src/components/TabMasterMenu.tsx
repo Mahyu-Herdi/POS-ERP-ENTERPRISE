@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'motion/react';
 export default function TabMasterMenu() {
   const { stokData, tempResep, setTempResep, menu, setMenu, bebanAktif, cart, setCart } = useStore();
   const [hppNama, setHppNama] = useState('');
-  const [isRekomendasi, setIsRekomendasi] = useState(false);
   const [resepSelect, setResepSelect] = useState('');
   const [isResepOpen, setIsResepOpen] = useState(false);
   const [resepQty, setResepQty] = useState('');
@@ -72,7 +71,7 @@ export default function TabMasterMenu() {
     }
 
     const newMenu = [...menu];
-    newMenu.push({ id: 'm' + Date.now(), name: hppNama, harga: jual, resep: [...tempResep], hppBahan: hppBahan, hppOp: opNum, isRekomendasi });
+    newMenu.push({ id: 'm' + Date.now(), name: hppNama, harga: jual, resep: [...tempResep], hppBahan: hppBahan, hppOp: opNum });
     setMenu(newMenu);
     
     setTempResep([]);
@@ -80,7 +79,6 @@ export default function TabMasterMenu() {
     setHppBahan(0);
     setHppOp('');
     setHppJual('');
-    setIsRekomendasi(false);
     await popup('alert', `Katalog menu ${hppNama} berhasil disimpan!`, "Sukses");
   };
 
@@ -103,16 +101,6 @@ export default function TabMasterMenu() {
     }
   };
 
-  const toggleRekomendasi = (id: string) => {
-    const newMenu = menu.map(m => {
-      if (m.id === id) {
-        return { ...m, isRekomendasi: !m.isRekomendasi };
-      }
-      return m;
-    });
-    setMenu(newMenu);
-  };
-
   const opNum = parseAngka(hppOp);
   const jualNum = parseAngka(hppJual);
   const profit = jualNum - (hppBahan + opNum);
@@ -127,22 +115,6 @@ export default function TabMasterMenu() {
           <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Nama Menu Baru</label>
           <input type="text" className="btn-input" placeholder="Cth: Kopi Arabika Susu" value={hppNama} onChange={e => setHppNama(e.target.value)} />
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', marginBottom: '8px' }}>
-            <input 
-              type="checkbox" 
-              id="isRekomendasi"
-              checked={isRekomendasi} 
-              onChange={e => setIsRekomendasi(e.target.checked)} 
-              style={{ width: '18px', height: '18px', cursor: 'pointer' }} 
-            />
-            <label htmlFor="isRekomendasi" style={{ fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span>Atur sebagai Menu Rekomendasi</span>
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="var(--orange)" stroke="none">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-            </label>
-          </div>
-      
           <label style={{ fontSize: '12px', fontWeight: 'bold', display: 'block', marginTop: '15px' }}>Master Resep Bahan Baku (Ditarik dari Data Stok)</label>
       <div style={{ display: 'flex', gap: '10px', marginTop: '5px', zIndex: 120, position: 'relative' }}>
         <div style={{ flex: 2, position: 'relative' }}>
@@ -325,38 +297,12 @@ export default function TabMasterMenu() {
               <div style={{ fontSize: '14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <strong>{m.name}</strong>
-                  {m.isRekomendasi && (
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="var(--orange)" stroke="none">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                    </svg>
-                  )}
                 </div>
                 <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>({m.resep && m.resep.length > 0 ? `${m.resep.length} Bahan baku` : 'Tanpa resep'})</span> 
                 <br /><span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Modal Bahan: Rp {(m.hppBahan || 0).toLocaleString('id-ID')} | Beban Ops: Rp {(m.hppOp || 0).toLocaleString('id-ID')}</span>
                 <br /><span className="text-blue" style={{ fontSize: '12px' }}>Harga Jual: Rp {m.harga.toLocaleString('id-ID')}</span>
               </div>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <button 
-                  onClick={() => toggleRekomendasi(m.id)}
-                  className="btn" 
-                  style={{ 
-                    padding: '6px', 
-                    borderRadius: '10px', 
-                    background: m.isRekomendasi ? 'rgba(251, 191, 36, 0.15)' : 'var(--input-bg)',
-                    boxShadow: m.isRekomendasi ? 'var(--clay-shadow-in)' : 'var(--btn-shadow-out)',
-                    border: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '32px',
-                    height: '32px'
-                  }}
-                  title={m.isRekomendasi ? "Hapus dari rekomendasi" : "Jadikan rekomendasi"}
-                >
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill={m.isRekomendasi ? "var(--orange)" : "none"} stroke={m.isRekomendasi ? "var(--orange)" : "var(--text-muted)"} strokeWidth="2">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                  </svg>
-                </button>
                 <button className="btn bg-red" style={{ padding: '6px 12px', fontSize: '12px', borderRadius: '10px' }} onClick={() => hapusMenu(m.id)}>Hapus</button>
               </div>
             </div>
