@@ -200,8 +200,14 @@ export const useStore = create<PosState>()(
         if (tx.tipe === 'Penjualan') {
           newKeuangan.masuk -= tx.total;
         } else if (tx.tipe === 'Kasbon') {
-          const hutangIdx = newHutangList.findIndex(h => h.id === tx.id || h.id === tx.hutangId || (h.nama === tx.ident && h.nominal === tx.total));
-          if (hutangIdx >= 0) newHutangList.splice(hutangIdx, 1);
+          const hutangIdx = newHutangList.findIndex(h => h.id === tx.id || h.id === tx.hutangId || (h.nama === tx.ident));
+          if (hutangIdx >= 0) {
+            newHutangList[hutangIdx].nominal -= tx.total;
+            newHutangList[hutangIdx].sisa -= tx.total;
+            if (newHutangList[hutangIdx].nominal <= 0) {
+              newHutangList.splice(hutangIdx, 1);
+            }
+          }
         } else if (tx.tipe === 'Pelunasan Kasbon') {
           newKeuangan.masuk -= tx.total;
           const hutangIdx = newHutangList.findIndex(h => h.id === tx.hutangId || h.nama === tx.ident);
@@ -287,7 +293,20 @@ export const useStore = create<PosState>()(
           stokHistory: newStokHistory
         };
       }),
-      addHutang: (hutang) => set((state) => ({ hutangList: [...state.hutangList, hutang] })),
+      addHutang: (hutang) => set((state) => {
+        const existingIdx = state.hutangList.findIndex(h => h.nama.toLowerCase() === hutang.nama.toLowerCase());
+        if (existingIdx >= 0) {
+          const newList = [...state.hutangList];
+          newList[existingIdx] = {
+            ...newList[existingIdx],
+            nominal: newList[existingIdx].nominal + hutang.nominal,
+            sisa: newList[existingIdx].sisa + hutang.sisa,
+            tglRaw: hutang.tglRaw
+          };
+          return { hutangList: newList };
+        }
+        return { hutangList: [...state.hutangList, hutang] };
+      }),
       updateHutang: (hutangList) => set({ hutangList }),
       
       updateKeuangan: (k) => set((state) => ({ keuangan: { ...state.keuangan, ...k } })),
